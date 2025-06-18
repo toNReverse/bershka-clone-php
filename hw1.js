@@ -317,9 +317,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     ${item.previous_price ? `<p class="price-old">${item.previous_price.toFixed(2)} €</p>` : ""}
                   </div>
                   <div class="right-icon">
-                    <img class="fav-icon" src="${isFav ? 'img/filled-hearth-search-page.png' : 'img/hearth-search-page.png'}" alt="cuoricino">
+                    <img class="fav-icon" src="${isFav ? 'img/filled-hearth-search-page.png' : 'img/hearth-search-page.png'}" alt="cuoricino" title="${isFav ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'}">
                     <a class="cart-btn" data-title="${item.title}" data-thumbnail="${item.thumbnail}" data-price="${item.extracted_price || 0}">
-                      <img class="cart-icon" src="${isInCart ? 'img/remove-from-cart.png' : 'img/add-to-cart.png'}" alt="carrello">
+                      <img class="cart-icon" src="${isInCart ? 'img/remove-from-cart.png' : 'img/add-to-cart.png'}" alt="carrello" title="${isInCart ? 'Rimuovi dal carrello' : 'Aggiungi al carrello'}">
                     </a>
                   </div>
                 </div>
@@ -336,38 +336,42 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 500);
   });
 
-  // === Preferiti: toggle cuoricino ===
-  document.addEventListener("click", (e) => {
-    if (e.target.classList.contains("fav-icon")) {
-      const card = e.target.closest(".product-card");
-      const item = JSON.parse(card.dataset.item);
+// Listener per toggle preferito (cuoricino)
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("fav-icon")) {
+    const card = e.target.closest(".product-card");
+    const item = JSON.parse(card.dataset.item);
 
-      const isFavorite = e.target.src.includes("filled-hearth-search-page.png");
+    const isFavorite = e.target.src.includes("filled-hearth-search-page.png");
 
-      if (isFavorite) {
-        removeFavorite(item.id);
-        e.target.src = "img/hearth-search-page.png";
-        e.target.title = "Aggiungi ai preferiti";
-      } else {
-        saveProduct(item);
-        e.target.src = "img/filled-hearth-search-page.png";
-        e.target.title = "Rimuovi dai preferiti";
-      }
+    if (isFavorite) {
+      console.log("Rimuovo dai preferiti:", item.title);  // Debug in console
+      removeFavorite(item.title)
+        .then(() => {
+          e.target.src = "img/hearth-search-page.png";
+          e.target.title = "Aggiungi ai preferiti";
+        })
+        .catch(() => alert("Errore nella rimozione"));
+    } else {
+      saveProduct(item);
+      e.target.src = "img/filled-hearth-search-page.png";
+      e.target.title = "Rimuovi dai preferiti";
     }
-  });
-
-  function removeFavorite(id) {
-    fetch("remove-product.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    })
-    .then(r => r.json())
-    .then(data => {
-      if (!data.ok) alert("Errore nella rimozione: " + (data.error || "sconosciuto"));
-    })
-    .catch(() => alert("Errore nella rimozione"));
   }
+});
+
+// Funzione rimuovi preferito, ora ritorna Promise per poter gestire success/error nel chiamante
+function removeFavorite(title) {
+  return fetch("remove-product.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title }),
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (!data.ok) return Promise.reject(data.error || "Errore sconosciuto");
+  });
+}
 
   function saveProduct(product) {
     const formData = new FormData();
@@ -412,6 +416,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.ok) {
           img.src = "img/add-to-cart.png";
           img.alt = "aggiungi al carrello";
+          img.title = "Aggiungi al carrello";
           loadCartItems(); // Assicurati che questa funzione esista e aggiorni la UI
         } else {
           alert("Errore nella rimozione dal carrello");
@@ -432,6 +437,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.ok) {
           img.src = "img/remove-from-cart.png";
           img.alt = "rimuovi dal carrello";
+          img.title = "Rimuovi dal carrello";
           loadCartItems(); // Assicurati che questa funzione esista e aggiorni la UI
         } else {
           alert("Errore nell'aggiunta al carrello");
@@ -451,6 +457,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (img) {
         img.src = "img/add-to-cart.png";
         img.alt = "aggiungi al carrello";
+        img.title = "Aggiungi al carrello";
       }
     }
   });
