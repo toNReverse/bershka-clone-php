@@ -364,7 +364,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const card = icon.closest(".product-card");
     const item = JSON.parse(card.dataset.item);
     const isFav = icon.src.includes("filled-hearth-search-page.png");
-
+  
     if (isFav) {
       if (!item.id) {
         alert("ID mancante, impossibile rimuovere dai preferiti.");
@@ -373,16 +373,27 @@ document.addEventListener("DOMContentLoaded", () => {
       removeFavorite(item.id).then(() => {
         icon.src = "img/hearth-search-page.png";
         icon.title = "Aggiungi ai preferiti";
+        // Aggiorna il dataset rimuovendo id
+        delete item.id;
+        card.dataset.item = JSON.stringify(item);
       }).catch(() => alert("Errore nella rimozione"));
     } else {
       saveFavorite(item).then((data) => {
-        icon.src = "img/filled-hearth-search-page.png";
-        icon.title = "Rimuovi dai preferiti";
-        if (data.id) item.id = data.id;
+        if (data.ok) {
+          icon.src = "img/filled-hearth-search-page.png";
+          icon.title = "Rimuovi dai preferiti";
+          // Aggiorna il dataset con l'id ricevuto dal server
+          if (data.id) {
+            item.id = data.id;
+            card.dataset.item = JSON.stringify(item);
+          }
+        } else {
+          alert("Errore nel salvataggio: " + (data.error || ""));
+        }
       }).catch(() => alert("Errore nel salvataggio"));
     }
   }
-
+  
   function removeFavorite(id) {
     return fetch("remove-product.php", {
       method: "POST",
@@ -391,16 +402,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }).then(res => res.json())
       .then(data => {
         if (!data.ok) return Promise.reject(data.error || "Errore");
+        return data;
       });
   }
-
+  
   function saveFavorite(product) {
     const formData = new FormData();
     formData.append("title", product.title || "");
     formData.append("snippet", product.snippet || "");
     formData.append("price", product.extracted_price || "");
     formData.append("thumbnail", product.thumbnail || "");
-
+  
     return fetch("save-product.php", {
       method: "POST",
       body: formData,
