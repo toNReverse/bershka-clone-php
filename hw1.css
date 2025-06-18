@@ -1888,15 +1888,12 @@ cursor: pointer;
   display: block;
 }
 /* CART BTN */
-.cart-btn {
-  background-color: green;
-  color: white;
-  padding: 4px 6px;
-  border-radius: 50%;
-  font-weight: bold;
-  cursor: pointer;
-  text-decoration: none;
 
+
+/* Icona del carrello */
+.cart-icon {
+  width: 24px;
+  height: 24px;
 }
 
 /* Container dei prodotti nel carrello */
@@ -1945,29 +1942,6 @@ cursor: pointer;
   color: #555;
 }
 
-/* Pulsanti + e - */
-.cart-action-buttons {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.cart-action-buttons a {
-  display: inline-block;
-  padding: 4px 10px;
-  background-color: black;
-  color: white;
-  border-radius: 4px;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: bold;
-  transition: background-color 0.2s ease;
-  cursor: pointer;
-}
-
-.cart-action-buttons a:hover {
-  background-color: #333;
-}
 .cart-items {
   padding: 0 16px;
   margin-top: 10px;

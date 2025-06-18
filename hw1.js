@@ -319,7 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   <div class="right-icon">
                     <img class="fav-icon" src="${isFav ? 'img/filled-hearth-search-page.png' : 'img/hearth-search-page.png'}" alt="cuoricino">
                     <a class="cart-btn" data-title="${item.title}" data-thumbnail="${item.thumbnail}" data-price="${item.extracted_price || 0}">
-                      ${isInCart ? "-" : "+"}
+                      <img class="cart-icon" src="${isInCart ? 'img/remove-from-cart.png' : 'img/add-to-cart.png'}" alt="carrello">
                     </a>
                   </div>
                 </div>
@@ -389,48 +389,68 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // === Carrello: toggle +/− ===
   document.addEventListener("click", (e) => {
-    if (e.target.classList.contains("cart-btn")) {
-      const btn = e.target;
-      const isInCart = btn.textContent.trim() === "-";
+    const btn = e.target.closest(".cart-btn");
+    if (!btn) return;
 
-      const title = btn.dataset.title;
-      const thumbnail = btn.dataset.thumbnail;
-      const price = btn.dataset.price;
+    const img = btn.querySelector("img.cart-icon");
+    if (!img) return;
 
-      if (isInCart) {
-        fetch("remove-from-cart.php", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ title })
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (data.ok) {
-            btn.textContent = "+";
-            loadCartItems(); // <=== Aggiorna carrello istantaneamente
-          } else {
-            alert("Errore nella rimozione dal carrello");
-          }
-        });
-      } else {
-        const formData = new FormData();
-        formData.append("title", title);
-        formData.append("thumbnail", thumbnail);
-        formData.append("price", price);
+    const isInCart = img.src.includes("remove-from-cart.png");
 
-        fetch("add-to-cart.php", {
-          method: "POST",
-          body: formData
-        })
-        .then(res => res.json())
-        .then(data => {
-          if (data.ok) {
-            btn.textContent = "-";
-            loadCartItems(); // <=== Aggiorna carrello istantaneamente
-          } else {
-            alert("Errore nell'aggiunta al carrello");
-          }
-        });
+    const title = btn.dataset.title;
+    const thumbnail = btn.dataset.thumbnail;
+    const price = btn.dataset.price;
+
+    if (isInCart) {
+      fetch("remove-from-cart.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok) {
+          img.src = "img/add-to-cart.png";
+          img.alt = "aggiungi al carrello";
+          loadCartItems(); // Assicurati che questa funzione esista e aggiorni la UI
+        } else {
+          alert("Errore nella rimozione dal carrello");
+        }
+      });
+    } else {
+      const formData = new FormData();
+      formData.append("title", title);
+      formData.append("thumbnail", thumbnail);
+      formData.append("price", price);
+
+      fetch("add-to-cart.php", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok) {
+          img.src = "img/remove-from-cart.png";
+          img.alt = "rimuovi dal carrello";
+          loadCartItems(); // Assicurati che questa funzione esista e aggiorni la UI
+        } else {
+          alert("Errore nell'aggiunta al carrello");
+        }
+      });
+    }
+  });
+
+  // === Listener per evento custom da modale carrello ===
+  document.addEventListener("cart-item-removed", (e) => {
+    const title = e.detail.title;
+
+    // Aggiorna l'icona carrello nella pagina ricerca se presente
+    const cartBtn = document.querySelector(`.cart-btn[data-title="${CSS.escape(title)}"]`);
+    if (cartBtn) {
+      const img = cartBtn.querySelector("img.cart-icon");
+      if (img) {
+        img.src = "img/add-to-cart.png";
+        img.alt = "aggiungi al carrello";
       }
     }
   });
