@@ -1,20 +1,18 @@
-document.addEventListener("DOMContentLoaded", () => {
+function loadCartItems() {
   const cartItemsContainer = document.getElementById("cart-items-container");
   const emptyCartContainer = document.getElementById("cart-empty-content");
 
-  // === Recupera gli elementi del carrello ===
   fetch("fetch-cart.php")
     .then(res => res.json())
     .then(cartItems => {
-      // Se il carrello è vuoto, mostra la sezione "vuota"
       if (!cartItems || cartItems.length === 0) {
         cartItemsContainer.classList.add("hidden");
         emptyCartContainer.classList.remove("hidden");
+        cartItemsContainer.innerHTML = "";
         return;
       }
 
-      // Altrimenti mostra gli articoli e nasconde il messaggio "carrello vuoto"
-      cartItemsContainer.innerHTML = ""; // Svuota il contenitore
+      cartItemsContainer.innerHTML = "";
       cartItemsContainer.classList.remove("hidden");
       emptyCartContainer.classList.add("hidden");
 
@@ -38,8 +36,11 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("Errore nel caricamento del carrello:", err);
       emptyCartContainer.classList.remove("hidden");
     });
+}
 
-  // === Listener per rimozione prodotti dal carrello ===
+document.addEventListener("DOMContentLoaded", () => {
+  loadCartItems();
+
   document.addEventListener("click", (e) => {
     if (e.target.classList.contains("remove-cart-item-btn")) {
       const title = e.target.dataset.title;
@@ -52,13 +53,8 @@ document.addEventListener("DOMContentLoaded", () => {
       .then(res => res.json())
       .then(data => {
         if (data.ok) {
-          e.target.closest(".cart-item").remove();
-
-          // Se non ci sono più prodotti, torna allo stato "vuoto"
-          if (cartItemsContainer.children.length === 0) {
-            cartItemsContainer.classList.add("hidden");
-            emptyCartContainer.classList.remove("hidden");
-          }
+          // Ricarica il carrello dopo la rimozione
+          loadCartItems();
         } else {
           alert("Errore nella rimozione dal carrello");
         }

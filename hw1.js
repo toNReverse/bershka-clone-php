@@ -293,7 +293,6 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
           }
 
-          // Recupera preferiti e carrello in parallelo
           Promise.all([
             fetch("fetch-product.php").then(res => res.json()),
             fetch("fetch-cart.php").then(res => res.json())
@@ -408,6 +407,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(data => {
           if (data.ok) {
             btn.textContent = "+";
+            loadCartItems(); // <=== Aggiorna carrello istantaneamente
           } else {
             alert("Errore nella rimozione dal carrello");
           }
@@ -426,6 +426,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(data => {
           if (data.ok) {
             btn.textContent = "-";
+            loadCartItems(); // <=== Aggiorna carrello istantaneamente
           } else {
             alert("Errore nell'aggiunta al carrello");
           }
