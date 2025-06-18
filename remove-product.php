@@ -1,10 +1,13 @@
 <?php
 require_once 'auth.php';
-if (!$userid = checkAuth()) exit;
+if (!$userid = checkAuth()) {
+    echo json_encode(['ok' => false, 'error' => 'Utente non autenticato']);
+    exit;
+}
 
 $data = json_decode(file_get_contents("php://input"), true);
 if (!isset($data['id'])) {
-    echo json_encode(["ok" => false, "error" => "ID mancante"]);
+    echo json_encode(['ok' => false, 'error' => 'ID mancante']);
     exit;
 }
 
@@ -15,10 +18,11 @@ $id = intval($data['id']);
 $userid = mysqli_real_escape_string($conn, $userid);
 
 $query = "DELETE FROM products WHERE user_id = '$userid' AND id = $id";
+
 if (mysqli_query($conn, $query)) {
-    echo json_encode(["ok" => true]);
+    echo json_encode(['ok' => true]);
 } else {
-    echo json_encode(["ok" => false, "error" => mysqli_error($conn)]);
+    echo json_encode(['ok' => false, 'error' => mysqli_error($conn)]);
 }
 
 mysqli_close($conn);
