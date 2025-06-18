@@ -55,6 +55,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.ok) {
           // Ricarica il carrello dopo la rimozione
           loadCartItems();
+
+          // Emetti evento custom per aggiornare icona nel search page
+          const event = new CustomEvent("cart-item-removed", { detail: { title } });
+          document.dispatchEvent(event);
+
         } else {
           alert("Errore nella rimozione dal carrello");
         }
