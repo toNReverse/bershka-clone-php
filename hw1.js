@@ -257,7 +257,6 @@ if (languageSelect) {
     }
   });
 }
-// === SEARCH PAGE ===
 document.addEventListener("DOMContentLoaded", () => {
   const input = document.querySelector(".search-input-page") || document.getElementById("search-input-products");
   const resultsContainer = document.querySelector("#results") || document.getElementById("results-products");
@@ -272,193 +271,199 @@ document.addEventListener("DOMContentLoaded", () => {
     const query = input.value.trim();
 
     if (query.length < 3) {
-      resultsContainer.innerHTML = "";
-      if (suggestSection) suggestSection.style.display = "block";
-      if (suggestTitle) suggestTitle.style.display = "block";
-      if (topSearchTags) topSearchTags.style.display = "flex";
+      showSuggestions();
       return;
     }
 
-    timeout = setTimeout(() => {
-      fetch(`search_content.php?q=${encodeURIComponent(query)}`)
-        .then(res => res.json())
-        .then(data => {
-          resultsContainer.innerHTML = "";
-          if (suggestSection) suggestSection.style.display = "none";
-          if (suggestTitle) suggestTitle.style.display = "none";
-          if (topSearchTags) topSearchTags.style.display = "none";
-
-          if (!data.shopping_results || data.shopping_results.length === 0) {
-            resultsContainer.innerHTML = "<p>Nessun risultato trovato.</p>";
-            return;
-          }
-
-          Promise.all([
-            fetch("fetch-product.php").then(res => res.json()),
-            fetch("fetch-cart.php").then(res => res.json())
-          ]).then(([favorites, cartItems]) => {
-            data.shopping_results.forEach(item => {
-              const isFav = favorites.some(fav => fav.title === item.title);
-              const isInCart = cartItems.some(cart => cart.title === item.title);
-
-              const card = document.createElement("div");
-              card.className = "product-card p-c-search";
-              card.dataset.item = JSON.stringify(item);
-
-              card.innerHTML = `
-                <img class="product-image" src="${item.thumbnail}" alt="${item.title}">
-                <div class="product-info">
-                  <div class="left-info">
-                    <p class="product-name">${item.title}</p>
-                    <div class="price-line">
-                      <span class="product-price">${item.extracted_price ? item.extracted_price.toFixed(2) + " €" : ""}</span>
-                      ${item.discount ? `<span class="discount">${item.discount}</span>` : ""}
-                    </div>
-                    ${item.previous_price ? `<p class="price-old">${item.previous_price.toFixed(2)} €</p>` : ""}
-                  </div>
-                  <div class="right-icon">
-                    <img class="fav-icon" src="${isFav ? 'img/filled-hearth-search-page.png' : 'img/hearth-search-page.png'}" alt="cuoricino" title="${isFav ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'}">
-                    <a class="cart-btn" data-title="${item.title}" data-thumbnail="${item.thumbnail}" data-price="${item.extracted_price || 0}">
-                      <img class="cart-icon" src="${isInCart ? 'img/remove-from-cart.png' : 'img/add-to-cart.png'}" alt="carrello" title="${isInCart ? 'Rimuovi dal carrello' : 'Aggiungi al carrello'}">
-                    </a>
-                  </div>
-                </div>
-              `;
-
-              resultsContainer.appendChild(card);
-            });
-          });
-        })
-        .catch(err => {
-          console.error("Errore nella ricerca:", err);
-          resultsContainer.innerHTML = "<p>Errore nel caricamento dei risultati.</p>";
-        });
-    }, 500);
+    timeout = setTimeout(() => handleSearch(query), 500);
   });
 
-// Listener per toggle preferito (cuoricino)
-document.addEventListener("click", (e) => {
-  if (e.target.classList.contains("fav-icon")) {
-    const card = e.target.closest(".product-card");
+  // === EVENT LISTENERS ===
+  document.addEventListener("click", (e) => {
+    if (e.target.classList.contains("fav-icon")) toggleFavorite(e.target);
+    if (e.target.closest(".cart-btn")) toggleCart(e.target.closest(".cart-btn"));
+  });
+
+  document.addEventListener("cart-item-removed", (e) => updateCartIcon(e.detail.title));
+
+  // === FUNZIONI DI RICERCA ===
+  function handleSearch(query) {
+    fetch(`search_content.php?q=${encodeURIComponent(query)}`)
+      .then(res => res.json())
+      .then(data => {
+        resultsContainer.innerHTML = "";
+        hideSuggestions();
+
+        if (!data.shopping_results || data.shopping_results.length === 0) {
+          resultsContainer.innerHTML = "<p>Nessun risultato trovato.</p>";
+          return;
+        }
+
+        Promise.all([
+          fetch("fetch-product.php").then(res => res.json()),
+          fetch("fetch-cart.php").then(res => res.json())
+        ]).then(([favorites, cartItems]) => {
+          data.shopping_results.forEach(item => {
+            const favoriteItem = favorites.find(fav => fav.title === item.title);
+            const isFav = Boolean(favoriteItem);
+            const isInCart = cartItems.some(cart => cart.title === item.title);
+            if (isFav) item.id = favoriteItem.id;
+
+            const card = createProductCard(item, isFav, isInCart);
+            resultsContainer.appendChild(card);
+          });
+        });
+      })
+      .catch(() => {
+        resultsContainer.innerHTML = "<p>Errore nel caricamento dei risultati.</p>";
+      });
+  }
+
+  function createProductCard(item, isFav, isInCart) {
+    const card = document.createElement("div");
+    card.className = "product-card p-c-search";
+    card.dataset.item = JSON.stringify(item);
+
+    card.innerHTML = `
+      <img class="product-image" src="${item.thumbnail}" alt="${item.title}">
+      <div class="product-info">
+        <div class="left-info">
+          <p class="product-name">${item.title}</p>
+          <div class="price-line">
+            <span class="product-price">${item.extracted_price ? item.extracted_price.toFixed(2) + " €" : ""}</span>
+            ${item.discount ? `<span class="discount">${item.discount}</span>` : ""}
+          </div>
+          ${item.previous_price ? `<p class="price-old">${item.previous_price.toFixed(2)} €</p>` : ""}
+        </div>
+        <div class="right-icon">
+          <img class="fav-icon" src="${isFav ? 'img/filled-hearth-search-page.png' : 'img/hearth-search-page.png'}" alt="cuoricino" title="${isFav ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti'}">
+          <a class="cart-btn" data-title="${item.title}" data-thumbnail="${item.thumbnail}" data-price="${item.extracted_price || 0}">
+            <img class="cart-icon" src="${isInCart ? 'img/remove-from-cart.png' : 'img/add-to-cart.png'}" alt="carrello" title="${isInCart ? 'Rimuovi dal carrello' : 'Aggiungi al carrello'}">
+          </a>
+        </div>
+      </div>
+    `;
+    return card;
+  }
+
+  function showSuggestions() {
+    resultsContainer.innerHTML = "";
+    if (suggestSection) suggestSection.style.display = "block";
+    if (suggestTitle) suggestTitle.style.display = "block";
+    if (topSearchTags) topSearchTags.style.display = "flex";
+  }
+
+  function hideSuggestions() {
+    if (suggestSection) suggestSection.style.display = "none";
+    if (suggestTitle) suggestTitle.style.display = "none";
+    if (topSearchTags) topSearchTags.style.display = "none";
+  }
+
+  // === FUNZIONI PREFERITI ===
+  function toggleFavorite(icon) {
+    const card = icon.closest(".product-card");
     const item = JSON.parse(card.dataset.item);
+    const isFav = icon.src.includes("filled-hearth-search-page.png");
 
-    const isFavorite = e.target.src.includes("filled-hearth-search-page.png");
-
-    if (isFavorite) {
-      console.log("Rimuovo dai preferiti:", item.title);  // Debug in console
-      removeFavorite(item.title)
-        .then(() => {
-          e.target.src = "img/hearth-search-page.png";
-          e.target.title = "Aggiungi ai preferiti";
-        })
-        .catch(() => alert("Errore nella rimozione"));
+    if (isFav) {
+      if (!item.id) {
+        alert("ID mancante, impossibile rimuovere dai preferiti.");
+        return;
+      }
+      removeFavorite(item.id).then(() => {
+        icon.src = "img/hearth-search-page.png";
+        icon.title = "Aggiungi ai preferiti";
+      }).catch(() => alert("Errore nella rimozione"));
     } else {
-      saveProduct(item);
-      e.target.src = "img/filled-hearth-search-page.png";
-      e.target.title = "Rimuovi dai preferiti";
+      saveFavorite(item).then((data) => {
+        icon.src = "img/filled-hearth-search-page.png";
+        icon.title = "Rimuovi dai preferiti";
+        if (data.id) item.id = data.id;
+      }).catch(() => alert("Errore nel salvataggio"));
     }
   }
-});
 
-// Funzione rimuovi preferito, ora ritorna Promise per poter gestire success/error nel chiamante
-function removeFavorite(title) {
-  return fetch("remove-product.php", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ title }),
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (!data.ok) return Promise.reject(data.error || "Errore sconosciuto");
-  });
-}
+  function removeFavorite(id) {
+    return fetch("remove-product.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    }).then(res => res.json())
+      .then(data => {
+        if (!data.ok) return Promise.reject(data.error || "Errore");
+      });
+  }
 
-  function saveProduct(product) {
+  function saveFavorite(product) {
     const formData = new FormData();
     formData.append("title", product.title || "");
     formData.append("snippet", product.snippet || "");
     formData.append("price", product.extracted_price || "");
     formData.append("thumbnail", product.thumbnail || "");
 
-    fetch("save-product.php", {
+    return fetch("save-product.php", {
       method: "POST",
       body: formData,
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (!data.ok) alert("Errore nel salvataggio");
-      })
-      .catch(() => alert("Errore nel salvataggio"));
+    }).then(res => res.json());
   }
 
-  // === Carrello: toggle +/− ===
-  document.addEventListener("click", (e) => {
-    const btn = e.target.closest(".cart-btn");
-    if (!btn) return;
-
+  // === FUNZIONI CARRELLO ===
+  function toggleCart(btn) {
     const img = btn.querySelector("img.cart-icon");
-    if (!img) return;
-
-    const isInCart = img.src.includes("remove-from-cart.png");
-
     const title = btn.dataset.title;
     const thumbnail = btn.dataset.thumbnail;
     const price = btn.dataset.price;
+    const isInCart = img.src.includes("remove-from-cart.png");
 
     if (isInCart) {
-      fetch("remove-from-cart.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title })
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.ok) {
-          img.src = "img/add-to-cart.png";
-          img.alt = "aggiungi al carrello";
-          img.title = "Aggiungi al carrello";
-          loadCartItems(); // Assicurati che questa funzione esista e aggiorni la UI
-        } else {
-          alert("Errore nella rimozione dal carrello");
-        }
-      });
+      removeFromCart(title).then(() => {
+        img.src = "img/add-to-cart.png";
+        img.title = "Aggiungi al carrello";
+        loadCartItems();
+      }).catch(() => alert("Errore nella rimozione dal carrello"));
     } else {
-      const formData = new FormData();
-      formData.append("title", title);
-      formData.append("thumbnail", thumbnail);
-      formData.append("price", price);
-
-      fetch("add-to-cart.php", {
-        method: "POST",
-        body: formData
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.ok) {
-          img.src = "img/remove-from-cart.png";
-          img.alt = "rimuovi dal carrello";
-          img.title = "Rimuovi dal carrello";
-          loadCartItems(); // Assicurati che questa funzione esista e aggiorni la UI
-        } else {
-          alert("Errore nell'aggiunta al carrello");
-        }
-      });
+      addToCart({ title, thumbnail, price }).then(() => {
+        img.src = "img/remove-from-cart.png";
+        img.title = "Rimuovi dal carrello";
+        loadCartItems();
+      }).catch(() => alert("Errore nell'aggiunta al carrello"));
     }
-  });
+  }
 
-  // === Listener per evento custom da modale carrello ===
-  document.addEventListener("cart-item-removed", (e) => {
-    const title = e.detail.title;
+  function removeFromCart(title) {
+    return fetch("remove-from-cart.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title }),
+    }).then(res => res.json())
+      .then(data => {
+        if (!data.ok) return Promise.reject(data.error || "Errore");
+      });
+  }
 
-    // Aggiorna l'icona carrello nella pagina ricerca se presente
-    const cartBtn = document.querySelector(`.cart-btn[data-title="${CSS.escape(title)}"]`);
-    if (cartBtn) {
-      const img = cartBtn.querySelector("img.cart-icon");
+  function addToCart(product) {
+    const formData = new FormData();
+    formData.append("title", product.title);
+    formData.append("thumbnail", product.thumbnail);
+    formData.append("price", product.price);
+
+    return fetch("add-to-cart.php", {
+      method: "POST",
+      body: formData,
+    }).then(res => res.json())
+      .then(data => {
+        if (!data.ok) return Promise.reject(data.error || "Errore");
+      });
+  }
+
+  function updateCartIcon(title) {
+    const btn = document.querySelector(`.cart-btn[data-title="${CSS.escape(title)}"]`);
+    if (btn) {
+      const img = btn.querySelector("img.cart-icon");
       if (img) {
         img.src = "img/add-to-cart.png";
-        img.alt = "aggiungi al carrello";
         img.title = "Aggiungi al carrello";
       }
     }
-  });
+  }
 });
