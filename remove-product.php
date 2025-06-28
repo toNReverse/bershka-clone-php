@@ -17,7 +17,7 @@ $conn = mysqli_connect($dbconfig['host'], $dbconfig['user'], $dbconfig['password
 $id = intval($data['id']);
 $userid = mysqli_real_escape_string($conn, $userid);
 
-$query = "DELETE FROM products WHERE user_id = '$userid' AND id = $id";
+$query = "DELETE FROM wishlist WHERE user_id = '$userid' AND id = $id";
 
 if (mysqli_query($conn, $query)) {
     echo json_encode(['ok' => true]);

@@ -18,7 +18,7 @@
     $price = isset($_POST['price']) ? mysqli_real_escape_string($conn, $_POST['price']) : '';
     $thumbnail = mysqli_real_escape_string($conn, $_POST['thumbnail']);
 
-    $query = "INSERT INTO products (user_id, title, snippet, price, thumbnail)
+    $query = "INSERT INTO wishlist (user_id, title, snippet, price, thumbnail)
             VALUES ('$userid', '$title', '$snippet', '$price', '$thumbnail')";
 
     if (mysqli_query($conn, $query)) {
