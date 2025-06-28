@@ -9,7 +9,7 @@ global $dbconfig;
 $conn = mysqli_connect($dbconfig['host'], $dbconfig['user'], $dbconfig['password'], $dbconfig['name']);
 
 $userid = mysqli_real_escape_string($conn, $userid);
-$query = "SELECT * FROM products WHERE user_id = '$userid'";
+$query = "SELECT * FROM wishlist WHERE user_id = '$userid'";
 $res = mysqli_query($conn, $query);
 
 $favorites = array();
