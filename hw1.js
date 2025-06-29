@@ -300,7 +300,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         Promise.all([
-          fetch("fetch-product.php").then(res => res.json()),
+          fetch("fetch-wishlist.php").then(res => res.json()),
           fetch("fetch-cart.php").then(res => res.json())
         ]).then(([favorites, cartItems]) => {
           data.shopping_results.forEach(item => {
@@ -395,7 +395,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   
   function removeFavorite(id) {
-    return fetch("remove-product.php", {
+    return fetch("remove-wishlist.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
@@ -413,7 +413,7 @@ document.addEventListener("DOMContentLoaded", () => {
     formData.append("price", product.extracted_price || "");
     formData.append("thumbnail", product.thumbnail || "");
   
-    return fetch("save-product.php", {
+    return fetch("save-wishlist.php", {
       method: "POST",
       body: formData,
     }).then(res => res.json());
