@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Funzione che invia una richiesta POST per rimuovere un prodotto dai preferiti
 function removeFavorite(id) {
-  fetch("remove-product.php", {
+  fetch("remove-wishlist.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" }, // Specifica il tipo di contenuto
     body: JSON.stringify({ id }), // Invia l'ID del prodotto in formato JSON
