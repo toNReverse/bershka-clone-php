@@ -11,7 +11,7 @@
   <link rel="stylesheet" href="hw1.css">
   <script src="hw1.js" defer></script>
   <script src="cart-modal.js" defer></script>
-
+  <script src="https://js.stripe.com/v3/"></script>
   
   <title>Bershka Uomo | Novità e Tendenze 2025</title>
 </head>
@@ -109,6 +109,8 @@
         <!-- Contenitore prodotti -->
         <div class="cart-items hidden" id="cart-items-container"></div>
 
+        <a class="checkout-button">PAGA ORA</a>
+        
         <!-- Stato carrello vuoto -->
         <div class="cart-empty-content" id="cart-empty-content">
           <img src="img/nobg.png" alt="Cuore spezzato" class="broken-heart" />

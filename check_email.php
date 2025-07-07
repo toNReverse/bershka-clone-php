@@ -1,7 +1,5 @@
 <?php
-    /*******************************************************
-        Controlla che i l'email sia unica
-    ********************************************************/
+
     require_once 'dbconfig.php';
     
     // Controllo che l'accesso sia legittimo
