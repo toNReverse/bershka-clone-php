@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .then((res) => res.json())
         .then((data) => {
           if (data.id) {
-            const stripe = Stripe("pk_test_TUA_CHIAVE_PUBBLICA"); // CHIAVE PUBBLICA
+            const stripe = Stripe(""); // CHIAVE PUBBLICA
             stripe.redirectToCheckout({ sessionId: data.id });
           } else {
             console.error("Errore lato server:", data.error || "Session ID mancante");

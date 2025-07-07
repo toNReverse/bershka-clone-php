@@ -12,6 +12,7 @@
   <script src="hw1.js" defer></script>
   <script src="cart-modal.js" defer></script>
   <script src="https://js.stripe.com/v3/"></script>
+  <script src="checkout.js"></script>
   
   <title>Bershka Uomo | Novità e Tendenze 2025</title>
 </head>
