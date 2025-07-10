@@ -15,6 +15,8 @@
   <script src="cart-modal.js" defer></script>
   <script src="https://js.stripe.com/v3/"></script>
   <script src="checkout.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 
 </head>
 <body>
