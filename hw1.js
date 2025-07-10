@@ -1,4 +1,3 @@
-// funzione per chiudere tutte le finestre di navigazione tranne quella attiva
 function chiudiAltriModaliNav(activeModalId) {
   const navModals = ['#nav-donna', '#nav-uomo', '#nav-bskteen'];
   
@@ -13,7 +12,6 @@ function chiudiAltriModaliNav(activeModalId) {
   });
 }
 
-// Funzione per aprire una modale
 function apriModale(triggerSelector, modalSelector) {
 document.querySelector(triggerSelector).addEventListener('click', () => {
   chiudiAltriModaliNav(modalSelector); // chiudi gli altri prima di aprire il nuovo
@@ -23,7 +21,6 @@ document.querySelector(triggerSelector).addEventListener('click', () => {
 });
 }
 
-// Funzione per chiudere una modale
 function chiudiModale(closeBtnSelector, modalSelector) {
 document.querySelector(closeBtnSelector).addEventListener('click', () => {
   const modale = document.querySelector(modalSelector);
@@ -32,7 +29,6 @@ document.querySelector(closeBtnSelector).addEventListener('click', () => {
 });
 }
 
-// Apertura e chiusura modale "Carrello"
 apriModale('#linksRIGHT a:nth-child(3)', '#cart-modal');
 chiudiModale('.close-btn-cart', '#cart-modal');
 
@@ -45,12 +41,10 @@ navModale.addEventListener('mouseleave', () => {
 });
 }
 
-// Apertura modali Navbar
 apriModale('#linksLEFT a:nth-child(1)', '#nav-donna');
 apriModale('#linksLEFT a:nth-child(2)', '#nav-uomo');
 apriModale('#linksLEFT a:nth-child(3)', '#nav-bskteen');
 
-// Chiusura modali Navbar al mouseleave
 chiudiNavModale('#nav-donna');
 chiudiNavModale('#nav-uomo');
 chiudiNavModale('#nav-bskteen');
@@ -68,22 +62,18 @@ document.querySelector('.search-container').addEventListener('click', function()
 
   isSearchOpen = !isSearchOpen;
 
-  // Toggle elements visibility
   elementsToToggle.forEach(el => {
       if (el) {
           el.style.display = isSearchOpen ? 'none' : '';
       }
   });
 
-  // Toglie il bordo da navbar 
   navbar.style.borderBottom = isSearchOpen ? 'none' : '1px solid black';
 
 
-  // Attiva/disattiva la visibilità dell'input di ricerca
   searchText.textContent = isSearchOpen ? "CHIUDI" : "CERCA";
   searchIcon.src = isSearchOpen ? "./img/close-icon.png" : "./img/54481.png";
   
-  // Cambia il colore del testo dell'input di ricerca
   document.querySelector('#search-page').style.display = isSearchOpen ? 'block' : 'none';
 
 
@@ -101,7 +91,6 @@ closeBtn.addEventListener('click', () => {
 menu.classList.remove('open');
 });
 
-// Tabs attivi
 const tabs = document.querySelectorAll('#gender-tabs .tab');
 const contents = document.querySelectorAll('.menu-content');
 
@@ -109,11 +98,9 @@ tabs.forEach(tab => {
 tab.addEventListener('click', function (e) {
   e.preventDefault();
 
-  // Aggiorna tab attivo
   tabs.forEach(t => t.classList.remove('active'));
   this.classList.add('active');
 
-  // Mostra il contenuto corretto
   const gender = this.getAttribute('data-gender');
   contents.forEach(content => content.style.display = 'none');
   document.getElementById('menu-' + gender).style.display = 'block';
@@ -121,12 +108,10 @@ tab.addEventListener('click', function (e) {
 });
 
 /* API CONVERSIONE VALUTA */
-// Selettori DOM
 const currencySelector = document.getElementById('currency-selector');
 const menuValuta = document.getElementById('currency-menu');
 const currencyDropdown = document.getElementById('currency');
 
-// Mappa simboli-valuta
 const symbols = {
   EUR: '€',
   USD: '$',
@@ -137,20 +122,17 @@ const symbols = {
   CHF: 'CHF'
 };
 
-// Mappa inversa simbolo -> codice
 const reverseSymbols = {};
 for (const code in symbols) {
   reverseSymbols[symbols[code]] = code;
 }
 
-// Mostra/nasconde il menu valuta
 if (currencySelector && menuValuta) {
   currencySelector.addEventListener("click", () => {
     menuValuta.classList.toggle("hidden");
   });
 }
 
-// Quando si seleziona una nuova valuta
 if (currencyDropdown && menuValuta) {
   currencyDropdown.addEventListener('change', () => {
     const selectedCurrency = currencyDropdown.value;
@@ -160,7 +142,6 @@ if (currencyDropdown && menuValuta) {
   });
 }
 
-// Funzione per aggiornare i prezzi in base alla valuta selezionata
 function updateExchangeRates(toCurrency) {
   const priceSelectors = ['.price', '.price-red', '.price-old'];
   const priceElements = document.querySelectorAll(priceSelectors.join(', '));
@@ -168,7 +149,6 @@ function updateExchangeRates(toCurrency) {
   priceElements.forEach(priceElement => {
     const text = priceElement.textContent.trim();
 
-    // Trova il simbolo alla fine
     let matchedSymbol = null;
     let symbolLength = 0;
 
@@ -182,7 +162,6 @@ function updateExchangeRates(toCurrency) {
 
     if (!matchedSymbol) return;
 
-    // Estrai e converti l'importo
     const amountText = text.slice(0, -symbolLength).trim().replace(',', '.');
     const amount = parseFloat(amountText);
     if (isNaN(amount)) return;
@@ -190,7 +169,6 @@ function updateExchangeRates(toCurrency) {
     const fromCurrency = reverseSymbols[matchedSymbol];
     if (fromCurrency === toCurrency) return;
 
-    // Chiamata al file PHP per la conversione
     fetch(`convert_currency.php?from=${fromCurrency}&to=${toCurrency}&amount=${amount}`)
       .then(response => {
         if (!response.ok) throw new Error('Errore nella richiesta al server PHP');
@@ -211,7 +189,6 @@ const selector = document.getElementById('language-selector');
 const menuTraslate = document.getElementById('language-menu');
 const languageSelect = document.getElementById('language');
 
-// Mostra/nasconde il menu a tendina
 if (selector && menuTraslate) {
   selector.addEventListener('click', () => {
     menuTraslate.classList.toggle('hidden');
@@ -373,7 +350,6 @@ document.addEventListener("DOMContentLoaded", () => {
       removeFavorite(item.id).then(() => {
         icon.src = "img/hearth-search-page.png";
         icon.title = "Aggiungi ai preferiti";
-        // Aggiorna il dataset rimuovendo id
         delete item.id;
         card.dataset.item = JSON.stringify(item);
       }).catch(() => alert("Errore nella rimozione"));
@@ -382,7 +358,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.ok) {
           icon.src = "img/filled-hearth-search-page.png";
           icon.title = "Rimuovi dai preferiti";
-          // Aggiorna il dataset con l'id ricevuto dal server
           if (data.id) {
             item.id = data.id;
             card.dataset.item = JSON.stringify(item);

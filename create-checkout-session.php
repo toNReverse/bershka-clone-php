@@ -5,7 +5,6 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Connessione al DB
 $conn = new mysqli("localhost", "root", "", "hw1"); // cambia se necessario
 
 if ($conn->connect_error) {
@@ -14,11 +13,10 @@ if ($conn->connect_error) {
     exit;
 }
 
-// 
+
 require_once __DIR__ . '/libs/stripe-php/init.php';
 \Stripe\Stripe::setApiKey(''); // CHIAVE SEGRETA
 
-// Verifica autenticazione utente
 $user_id = $_SESSION['_agora_user_id'] ?? null;
 if (!$user_id) {
     http_response_code(403);
@@ -26,7 +24,6 @@ if (!$user_id) {
     exit;
 }
 
-// Recupera i prodotti nel carrello
 $sql = "SELECT title, price FROM cart WHERE user_id = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $user_id);
@@ -39,7 +36,7 @@ while ($row = $result->fetch_assoc()) {
         'price_data' => [
             'currency' => 'eur',
             'product_data' => ['name' => $row['title']],
-            'unit_amount' => intval($row['price'] * 100), // € → centesimi
+            'unit_amount' => intval($row['price'] * 100), 
         ],
         'quantity' => 1
     ];
@@ -51,7 +48,6 @@ if (empty($line_items)) {
     exit;
 }
 
-// Crea la sessione Stripe
 $YOUR_DOMAIN = 'http://localhost/hw1';
 
 try {

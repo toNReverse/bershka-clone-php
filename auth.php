@@ -1,7 +1,6 @@
 <?php
 require_once 'dbconfig.php';
 
-// Avvia la sessione solo se non è già attiva
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
