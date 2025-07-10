@@ -1,5 +1,4 @@
 <?php
-    // Verifica che l'utente sia già loggato, in caso positivo va direttamente alla home
     include 'auth.php';
     if (checkAuth()) {
         header('Location: index.php');
@@ -7,27 +6,22 @@
     }
 
     
-    // login.php (dopo autenticazione corretta)
     session_start();
     $_SESSION['user_id'] = $user['id'];
 
-
     if (!empty($_POST["email"]) && !empty($_POST["password"])) {
-        // Connessione al DB
         $conn = mysqli_connect($dbconfig['host'], $dbconfig['user'], $dbconfig['password'], $dbconfig['name']) 
                 or die(mysqli_error($conn));
 
         $email = mysqli_real_escape_string($conn, $_POST['email']);
 
-        // Query per cercare l'utente tramite email
         $query = "SELECT * FROM users WHERE email = '".$email."'";
         $res = mysqli_query($conn, $query) or die(mysqli_error($conn));
         
         if (mysqli_num_rows($res) > 0) {
             $entry = mysqli_fetch_assoc($res);
             if (password_verify($_POST['password'], $entry['password'])) {
-                // Imposto la sessione dell'utente
-                $_SESSION["_agora_name"] = $entry['name']; // AGGIUNGI QUESTA
+                $_SESSION["_agora_name"] = $entry['name']; 
                 $_SESSION["_agora_email"] = $entry['email'];
                 $_SESSION["_agora_user_id"] = $entry['id'];
                 header("Location: index.php");
@@ -36,10 +30,8 @@
                 exit;
             }
         }
-        // Se l'utente non è stato trovato o la password non ha passato la verifica
         $error = "Email e/o password errati.";
     } else if (isset($_POST["email"]) || isset($_POST["password"])) {
-        // Se solo uno dei due è impostato
         $error = "Inserisci email e password.";
     }
 ?>
