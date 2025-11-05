@@ -1,5 +1,7 @@
 # Bershka Clone – PHP
 
+![Bershka Clone Screenshot](https://i.imgur.com/TWeTqOQ.jpeg)
+
 This project is a complete e-commerce web application inspired by the Bershka website.  
 It is developed using pure **PHP**, **HTML**, **CSS**, and **JavaScript**, without any front-end or back-end frameworks.  
 Originally created as part of a university exam, it has been refined to serve as a professional example of a fully functional, API-integrated e-commerce platform.
