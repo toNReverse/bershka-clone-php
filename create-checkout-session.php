@@ -15,7 +15,7 @@ if ($conn->connect_error) {
 
 
 require_once __DIR__ . '/libs/stripe-php/init.php';
-\Stripe\Stripe::setApiKey(''); // CHIAVE SEGRETA
+\Stripe\Stripe::setApiKey('STRIPE_SECRET_KEY'); // CHIAVE SEGRETA
 
 $user_id = $_SESSION['_agora_user_id'] ?? null;
 if (!$user_id) {
