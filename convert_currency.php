@@ -10,7 +10,13 @@ if (!$fromCurrency || !$toCurrency || !$amount) {
     exit;
 }
 
-$apiKey = 'REDACTED_EXCHANGERATE_KEY'; // chiave API
+$config = file_exists(__DIR__ . '/config.php') ? require __DIR__ . '/config.php' : [];
+$apiKey = $config['exchangerate_key'] ?? getenv('EXCHANGERATE_KEY'); // chiave in config.php (vedi config.example.php)
+
+if (empty($apiKey)) {
+    echo json_encode(['error' => 'Chiave ExchangeRate non configurata']);
+    exit;
+}
 
 $apiUrl = "https://v6.exchangerate-api.com/v6/$apiKey/latest/$fromCurrency";
 

@@ -79,7 +79,7 @@ Since this project does not use Composer or NPM, setting it up is straightforwar
 
 ## ⚙️ Configuration (API Keys)
 
-To enable external features, you need to configure your API keys. Look for the API configuration section in your PHP files (often in a `config.php` or within the specific scripts handling the requests) and insert your keys:
+To enable external features, copy `config.example.php` to `config.php` and insert your keys there (`config.php` is git-ignored). Alternatively, set the `SERPAPI_KEY` and `EXCHANGERATE_KEY` environment variables:
 
 * **SerpAPI:** Used for product search functionality. Register at [https://serpapi.com](https://serpapi.com).
 * **MyMemory Translation API:** Used to dynamically translate product names and descriptions. Register at [https://mymemory.translated.net/doc/spec.php](https://mymemory.translated.net/doc/spec.php).
